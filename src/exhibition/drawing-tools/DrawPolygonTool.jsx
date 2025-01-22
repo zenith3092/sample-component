@@ -10,17 +10,25 @@ import PromptCard, {
   PromptContent,
   PromptHeader,
 } from "../../components/prompt-card/PromptCard";
+import { toBlob } from "html-to-image";
+
+/**
+ * @typedef {object} DrawingTool
+ * @property {number[][]} polygons
+ * @property {(outputWidth?: number, outputHeight?: number, quality?: number) => Promise<File>} outputImageFile
+ * @property {(image: string) => void} changeImage
+ * @property {(polygonsArray: number[][]) => void} initPolygons
+ */
 
 const DrawPolygonTool = forwardRef(
   /**
    * @param {object} props
-   * @param {string} props.backgroundImage
    * @param {number[][]} props.initPolygons
-   * @param {React.ForwardedRef<any>} ref
+   * @param {React.ForwardedRef<DrawingTool>} ref
    */
-  ({ backgroundImage, initPolygons = [] }, ref) => {
-    const canvasWidth = 500;
-    const canvasHeight = 500;
+  ({}, ref) => {
+    const canvasWidth = 640;
+    const canvasHeight = 360;
 
     const dotColor = "black";
     const dotRadius = 5;
@@ -33,9 +41,15 @@ const DrawPolygonTool = forwardRef(
     const focusWidth = 3;
     const focusPadding = 10;
 
-    const [cursor, setCursor] = useState("pointer");
+    const drawModes = {
+      REMOVE: "REMOVE",
+      DOT: "DOT",
+    };
 
-    const [mode, setMode] = useState("drawDot"); // drawDot, erase
+    const [cursor, setCursor] = useState("pointer");
+    const [backgroundImage, setBackgroundImage] = useState("");
+
+    const [mode, setMode] = useState(drawModes.DOT); // drawDot, erase
 
     /** @type {[number[][], React.Dispatch<React.SetStateAction<number[][]>>]} */
     const [polygons, setPolygons] = useState([]);
@@ -56,16 +70,15 @@ const DrawPolygonTool = forwardRef(
     /** @type {React.MutableRefObject<HTMLCanvasElement | null>} */
     const drawCanvasRef = useRef(null);
 
-    /** @type {React.MutableRefObject<HTMLCanvasElement | null>} */
-    const bgCanvasRef = useRef(null);
+    /** @type {React.MutableRefObject<HTMLImageElement | null>} */
+    const imgRef = useRef(null);
 
     /**
+     * @param {CanvasRenderingContext2D} ctx
      * @param {number} x
-     * @param {number} ys
-     * @param {string} color
+     * @param {number} y
      */
-    function drawDot(x, y) {
-      const ctx = drawCanvasRef.current.getContext("2d");
+    function drawDot(ctx, x, y) {
       ctx.beginPath();
       ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = dotColor;
@@ -73,14 +86,14 @@ const DrawPolygonTool = forwardRef(
     }
 
     /**
+     * @param {HTMLCanvasElement} canvas
      * @param {number[]} coordArray
      */
-    function strokeVertices(coordArray) {
+    function strokeVertices(canvas, coordArray) {
       if (coordArray.length < 2) {
         return;
       }
 
-      const canvas = drawCanvasRef.current;
       const ctx = canvas.getContext("2d");
       ctx.beginPath();
       ctx.moveTo(coordArray[0] * canvas.width, coordArray[1] * canvas.height);
@@ -103,15 +116,13 @@ const DrawPolygonTool = forwardRef(
     }
 
     /**
-     *
+     * @param {HTMLCanvasElement} canvas
      * @param {number[]} coordArray
      */
-    function drawFocus(coordArray) {
-      const canvas = focusCanvasRef.current;
-
+    function drawFocus(canvas, coordArray) {
       const ctx = canvas.getContext("2d");
 
-      const [cx, cy] = getCenterPoint(coordArray);
+      const [cx, cy] = getCenterPoint(drawCanvasRef.current, coordArray);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -131,21 +142,22 @@ const DrawPolygonTool = forwardRef(
       ctx.stroke();
     }
 
-    function clearFocus() {
-      const canvas = focusCanvasRef.current;
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
+    function clearCanvas(canvas) {
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     /**
+     * @param {HTMLCanvasElement} canvas
      * @param {number} x
      * @param {number} y
      * @param {number[]} coordArray
      * @returns {boolean}
      */
-    function polygonContains(x, y, coordArray) {
-      const canvas = drawCanvasRef.current;
-
+    function polygonContains(canvas, x, y, coordArray) {
       let flag = false;
       const n = coordArray.length;
       let j = n - 2;
@@ -168,12 +180,11 @@ const DrawPolygonTool = forwardRef(
     }
 
     /**
+     * @param {HTMLCanvasElement} canvas
      * @param {number[]} coordArray
      * @returns {number[]}
      */
-    function getCenterPoint(coordArray) {
-      const canvas = drawCanvasRef.current;
-
+    function getCenterPoint(canvas, coordArray) {
       let cx = 0;
       let cy = 0;
       let area = 0;
@@ -196,30 +207,42 @@ const DrawPolygonTool = forwardRef(
       return [cx, cy];
     }
 
-    const drawPolygonVertices = useCallback(() => {
-      const canvas = drawCanvasRef.current;
-      for (let i = 0; i < drawingVertices.length; i += 2) {
-        drawDot(
-          drawingVertices[i] * canvas.width,
-          drawingVertices[i + 1] * canvas.height
-        );
-      }
-    }, [drawingVertices]);
+    const drawPolygonVertices = useCallback(
+      /**
+       * @param {HTMLCanvasElement} canvas
+       */
+      (canvas) => {
+        const ctx = canvas.getContext("2d");
+        for (let i = 0; i < drawingVertices.length; i += 2) {
+          drawDot(
+            ctx,
+            drawingVertices[i] * canvas.width,
+            drawingVertices[i + 1] * canvas.height
+          );
+        }
+      },
+      [drawingVertices]
+    );
 
-    const strokePolygons = useCallback(() => {
-      const canvas = drawCanvasRef.current;
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
+    function strokePolygons(canvas, polygons) {
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       polygons.forEach((polygon) => {
-        strokeVertices(polygon);
+        strokeVertices(canvas, polygon);
       });
-    }, [polygons]);
+    }
 
     const handleClick = useCallback(
+      /**
+       * @param {React.MouseEvent<HTMLCanvasElement, MouseEvent>} e
+       */
       (e) => {
         switch (mode) {
-          case "drawDot":
+          case drawModes.DOT:
             const canvas = drawCanvasRef.current;
             const adjustment = canvas.getBoundingClientRect();
 
@@ -232,7 +255,7 @@ const DrawPolygonTool = forwardRef(
               y / canvas.height,
             ]);
             break;
-          case "erase":
+          case drawModes.REMOVE:
             if (selectedIdx !== -1) {
               setOpenConfirmPrompt(true);
             }
@@ -245,24 +268,27 @@ const DrawPolygonTool = forwardRef(
     );
 
     const handleMouseMove = useCallback(
+      /**
+       * @param {React.MouseEvent<HTMLCanvasElement, MouseEvent>} e
+       */
       (e) => {
-        if (mode === "erase") {
+        if (mode === drawModes.REMOVE) {
           const canvas = drawCanvasRef.current;
           const adjustment = canvas.getBoundingClientRect();
           const x = e.clientX - adjustment.left;
           const y = e.clientY - adjustment.top;
           for (let idx = 0; idx < polygons.length; idx++) {
             const polygon = polygons[idx];
-            if (polygonContains(x, y, polygon)) {
+            if (polygonContains(drawCanvasRef.current, x, y, polygon)) {
               setCursor("pointer");
               setSelectedIdx(idx);
-              drawFocus(polygon);
+              drawFocus(focusCanvasRef.current, polygon);
               return;
             }
           }
           setCursor("default");
           setSelectedIdx(-1);
-          clearFocus();
+          clearCanvas(focusCanvasRef.current);
         } else {
           setCursor("pointer");
         }
@@ -270,49 +296,116 @@ const DrawPolygonTool = forwardRef(
       [mode, polygons]
     );
 
+    const outputImageFile = useCallback(
+      /**
+       *
+       * @param {number} outputWidth
+       * @param {number} outputHeight
+       * @param {number} quality
+       * @returns {Promise<File>}
+       */
+      async (outputWidth = 1440, outputHeight = 810, quality = 1) => {
+        if (!backgroundImage) {
+          throw new Error("Background image is not set");
+        }
+
+        const canvasDiv = document.createElement("div");
+        canvasDiv.style.width = `${outputWidth}px`;
+        canvasDiv.style.height = `${outputHeight}px`;
+        canvasDiv.style.position = "relative";
+
+        const drawCanvas = document.createElement("canvas");
+        drawCanvas.width = outputWidth;
+        drawCanvas.height = outputHeight;
+        drawCanvas.style.width = `${outputWidth}px`;
+        drawCanvas.style.height = `${outputHeight}px`;
+        strokePolygons(drawCanvas, polygons);
+        const canvasDataUrl = drawCanvas.toDataURL("image/png", 1);
+
+        const canvasImage = document.createElement("img");
+        canvasImage.src = canvasDataUrl;
+        canvasImage.style.width = `${outputWidth}px`;
+        canvasImage.style.height = `${outputHeight}px`;
+        canvasImage.style.position = "absolute";
+        canvasImage.style.top = "0";
+        canvasImage.style.left = "0";
+        canvasImage.style.zIndex = "10";
+
+        const img = document.createElement("img");
+        img.src = backgroundImage;
+        img.style.width = `${outputWidth}px`;
+        img.style.height = `${outputHeight}px`;
+        img.style.position = "absolute";
+        img.style.top = "0";
+        img.style.left = "0";
+        img.style.zIndex = "1";
+
+        canvasDiv.appendChild(img);
+        canvasDiv.appendChild(canvasImage);
+
+        const blob = await toBlob(canvasDiv, {
+          width: outputWidth,
+          height: outputHeight,
+          quality: quality,
+        });
+        const file = new File([blob], "output.png", { type: "image/png" });
+
+        // canvasDiv.remove();
+
+        return file;
+      },
+      [backgroundImage, polygons]
+    );
+
+    const changeImage = useCallback(
+      /**
+       * @param {string} image
+       */
+      (image) => {
+        setBackgroundImage(image);
+      },
+      []
+    );
+
+    function initPolygons(polygonsArray) {
+      setPolygons(polygonsArray);
+    }
+
     useImperativeHandle(
       ref,
       () => ({
         polygons,
+        outputImageFile,
+        changeImage,
+        initPolygons,
       }),
       [polygons]
     );
 
     useEffect(() => {
-      const canvas = bgCanvasRef.current;
-      const ctx = canvas.getContext("2d");
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (!backgroundImage) {
-        return;
-      }
-
-      const img = new Image();
-      img.src = backgroundImage;
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      };
-
-      return () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      };
-    }, [backgroundImage]);
-
-    useEffect(() => {
-      setPolygons(initPolygons);
-    }, [initPolygons]);
-
-    useEffect(() => {
-      strokePolygons();
+      strokePolygons(drawCanvasRef.current, polygons);
     }, [polygons]);
 
     useEffect(() => {
-      drawPolygonVertices();
+      drawPolygonVertices(drawCanvasRef.current);
     }, [drawingVertices]);
 
+    useEffect(() => {
+      if (backgroundImage) {
+        imgRef.current.src = backgroundImage;
+        strokePolygons(drawCanvasRef.current, polygons);
+      }
+    }, [backgroundImage, polygons]);
+
     return (
-      <div className="draw">
+      <div
+        className="draw"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          marginBottom: "10px",
+        }}
+      >
         <div
           className="canvas-container"
           ref={canvasDivRef}
@@ -322,30 +415,13 @@ const DrawPolygonTool = forwardRef(
             height: `${canvasHeight}px`,
           }}
         >
-          <canvas
-            ref={focusCanvasRef}
-            width={canvasWidth}
-            height={canvasHeight}
-            id="canvas"
+          <img
+            ref={imgRef}
+            alt=""
             style={{
-              border: "1px solid black",
-              borderRadius: "5px",
-              cursor: cursor,
-              position: "absolute",
-              top: "0",
-              left: "0",
-              zIndex: "2",
-            }}
-            onClick={handleClick}
-            onMouseMove={handleMouseMove}
-          />
-          <canvas
-            ref={drawCanvasRef}
-            width={canvasWidth}
-            height={canvasHeight}
-            id="canvas"
-            style={{
-              border: "1px solid black",
+              width: `${canvasWidth}px`,
+              height: `${canvasHeight}px`,
+              // border: backgroundImage ? "" : "1px solid black",
               borderRadius: "5px",
               position: "absolute",
               top: "0",
@@ -354,20 +430,50 @@ const DrawPolygonTool = forwardRef(
             }}
           />
           <canvas
-            ref={bgCanvasRef}
+            ref={drawCanvasRef}
             width={canvasWidth}
             height={canvasHeight}
             id="canvas"
             style={{
-              border: "1px solid black",
+              width: `${canvasWidth}px`,
+              height: `${canvasHeight}px`,
+              // border: backgroundImage ? "" : "1px solid black",
               borderRadius: "5px",
+              position: "absolute",
+              top: "0",
+              left: "0",
+              zIndex: "50",
             }}
           />
+          <canvas
+            ref={focusCanvasRef}
+            width={canvasWidth}
+            height={canvasHeight}
+            id="canvas"
+            style={{
+              width: `${canvasWidth}px`,
+              height: `${canvasHeight}px`,
+              // border: backgroundImage ? "" : "1px solid black",
+              borderRadius: "5px",
+              cursor: cursor,
+              position: "absolute",
+              top: "0",
+              left: "0",
+              zIndex: "100",
+            }}
+            onClick={handleClick}
+            onMouseMove={handleMouseMove}
+          />
         </div>
-        <div>
-          <button className="draw-dot-btn" onClick={() => setMode("drawDot")}>
-            Dot
-          </button>
+        <div className="draw-btns">
+          {mode === drawModes.REMOVE && (
+            <button
+              className="draw-dot-btn"
+              onClick={() => setMode(drawModes.DOT)}
+            >
+              Dot Mode
+            </button>
+          )}
           <button
             className="stroke-btn"
             onClick={() => {
@@ -377,17 +483,19 @@ const DrawPolygonTool = forwardRef(
           >
             Stroke
           </button>
-          <button className="remove-btn" onClick={() => setMode("erase")}>
-            Remove
-          </button>
-          <button
-            id="output-btn"
-            onClick={() => {
-              console.log(polygons);
-            }}
-          >
-            Output
-          </button>
+          {mode === drawModes.DOT && (
+            <>
+              <button
+                className="remove-btn"
+                onClick={() => setMode(drawModes.REMOVE)}
+              >
+                Remove Mode
+              </button>
+              <button className="btn-btn" onClick={() => setPolygons([])}>
+                Clear
+              </button>
+            </>
+          )}
         </div>
         <PromptCard
           {...{
@@ -413,7 +521,7 @@ const DrawPolygonTool = forwardRef(
                     return newPolygons;
                   });
                   setSelectedIdx(-1);
-                  clearFocus();
+                  clearCanvas(focusCanvasRef.current);
                   setOpenConfirmPrompt(false);
                 }}
               >
