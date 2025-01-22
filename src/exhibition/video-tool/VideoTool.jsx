@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import CameraStreaming from "./camera-streaming";
-import { toCanvas, toPng } from "html-to-image";
 
 const VideoTool = ({ setCaptureImage }) => {
   const videoRef = useRef(null);
@@ -28,7 +27,6 @@ const VideoTool = ({ setCaptureImage }) => {
         onClick={() => {
           const canvas = document.createElement("canvas");
           canvas.width = window.innerWidth * 0.95;
-          // canvas.width = videoWidth;
           canvas.height = (canvas.width * 9) / 16;
 
           const ctx = canvas.getContext("2d");

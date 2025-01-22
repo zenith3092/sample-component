@@ -5,6 +5,8 @@ import DrawPolygonTool from "./exhibition/drawing-tools/DrawPolygonTool";
 import VideoTool from "./exhibition/video-tool/VideoTool";
 import axios from "axios";
 
+const WEB_SERVER_URL = import.meta.env.VITE_WEB_SERVER_URL;
+
 function App() {
   const toolRef = useRef(null);
   const bgCanvasRef = useRef(null);
@@ -33,7 +35,7 @@ function App() {
           formData.append("vp_captures", file);
 
           const res = await axios.post(
-            "http://127.0.0.1:5211/api/upload/vp_captures",
+            `${WEB_SERVER_URL}/api/upload/vp_captures`,
             formData,
             {
               headers: {
