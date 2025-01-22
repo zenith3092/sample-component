@@ -18,6 +18,7 @@ import { toBlob } from "html-to-image";
  * @property {(outputWidth?: number, outputHeight?: number, quality?: number) => Promise<File>} outputImageFile
  * @property {(image: string) => void} changeImage
  * @property {(polygonsArray: number[][]) => void} initPolygons
+ * @property {() => void} clearPolygons
  */
 
 const DrawPolygonTool = forwardRef(
@@ -38,7 +39,7 @@ const DrawPolygonTool = forwardRef(
 
     const focusColor = "red";
     const focusWidth = 3;
-    const focusPadding = 5;
+    const focusPadding = 20;
 
     const drawModes = {
       REMOVE: "REMOVE",
@@ -370,6 +371,10 @@ const DrawPolygonTool = forwardRef(
       setPolygons(polygonsArray);
     }
 
+    function clearPolygons() {
+      setPolygons([]);
+    }
+
     useImperativeHandle(
       ref,
       () => ({
@@ -377,6 +382,7 @@ const DrawPolygonTool = forwardRef(
         outputImageFile,
         changeImage,
         initPolygons,
+        clearPolygons,
       }),
       [polygons]
     );
@@ -420,7 +426,7 @@ const DrawPolygonTool = forwardRef(
             style={{
               width: `${canvasWidth}px`,
               height: `${canvasHeight}px`,
-              // border: backgroundImage ? "" : "1px solid black",
+              border: backgroundImage ? "" : "1px solid black",
               borderRadius: "5px",
               position: "absolute",
               top: "0",
@@ -436,7 +442,7 @@ const DrawPolygonTool = forwardRef(
             style={{
               width: `${canvasWidth}px`,
               height: `${canvasHeight}px`,
-              // border: backgroundImage ? "" : "1px solid black",
+              border: backgroundImage ? "" : "1px solid black",
               borderRadius: "5px",
               position: "absolute",
               top: "0",
@@ -452,7 +458,7 @@ const DrawPolygonTool = forwardRef(
             style={{
               width: `${canvasWidth}px`,
               height: `${canvasHeight}px`,
-              // border: backgroundImage ? "" : "1px solid black",
+              border: backgroundImage ? "" : "1px solid black",
               borderRadius: "5px",
               cursor: cursor,
               position: "absolute",
@@ -473,17 +479,18 @@ const DrawPolygonTool = forwardRef(
               Dot Mode
             </button>
           )}
-          <button
-            className="stroke-btn"
-            onClick={() => {
-              setPolygons([...polygons, drawingVertices]);
-              setDrawingVertices([]);
-            }}
-          >
-            Stroke
-          </button>
+
           {mode === drawModes.DOT && (
             <>
+              <button
+                className="stroke-btn"
+                onClick={() => {
+                  setPolygons([...polygons, drawingVertices]);
+                  setDrawingVertices([]);
+                }}
+              >
+                Stroke
+              </button>
               <button
                 className="remove-btn"
                 onClick={() => setMode(drawModes.REMOVE)}

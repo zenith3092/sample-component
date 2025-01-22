@@ -15,6 +15,7 @@ function App() {
 
   useEffect(() => {
     toolRef.current.changeImage(captureImage);
+    toolRef.current.clearPolygons();
   }, [captureImage]);
 
   return (
