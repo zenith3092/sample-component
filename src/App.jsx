@@ -18,43 +18,42 @@ function App() {
   }, [captureImage]);
 
   return (
-    <div className="App">
+    <div className="App" style={{ marginTop: "20px" }}>
       <Toggle />
-      <button
-        onClick={() => {
-          console.log(toolRef.current.polygons);
-        }}
-      >
-        Coordinate Output
-      </button>
-      <button
-        onClick={async () => {
-          const file = await toolRef.current.outputImageFile();
+      <div>
+        <button
+          onClick={() => {
+            console.log(toolRef.current.polygons);
+          }}
+        >
+          Coordinate Output
+        </button>
+        <button
+          onClick={async () => {
+            const file = await toolRef.current.outputImageFile();
 
-          const formData = new FormData();
-          formData.append("vp_captures", file);
+            const formData = new FormData();
+            formData.append("vp_captures", file);
 
-          const res = await axios.post(
-            `${WEB_SERVER_URL}/api/upload/vp_captures`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
+            const res = await axios.post(
+              `${WEB_SERVER_URL}/api/upload/vp_captures`,
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
 
-          console.log(res.data);
-        }}
-      >
-        Image Output
-      </button>
-      <DrawPolygonTool
-        ref={toolRef}
-        bgCanvasRef={bgCanvasRef}
-        initPolygons={[]}
-      />
-      <VideoTool setCaptureImage={setCaptureImage} bgCanvasRef={bgCanvasRef} />
+            console.log(res.data);
+          }}
+        >
+          Image Output
+        </button>
+      </div>
+
+      <DrawPolygonTool ref={toolRef} />
+      <VideoTool deviceId={"CAMERA-201-1"} setCaptureImage={setCaptureImage} />
     </div>
   );
 }

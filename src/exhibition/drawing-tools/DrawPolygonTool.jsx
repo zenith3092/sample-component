@@ -23,7 +23,6 @@ import { toBlob } from "html-to-image";
 const DrawPolygonTool = forwardRef(
   /**
    * @param {object} props
-   * @param {number[][]} props.initPolygons
    * @param {React.ForwardedRef<DrawingTool>} ref
    */
   ({}, ref) => {
@@ -39,7 +38,7 @@ const DrawPolygonTool = forwardRef(
 
     const focusColor = "red";
     const focusWidth = 3;
-    const focusPadding = 10;
+    const focusPadding = 5;
 
     const drawModes = {
       REMOVE: "REMOVE",

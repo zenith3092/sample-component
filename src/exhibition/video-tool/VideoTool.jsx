@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import CameraStreaming from "./camera-streaming";
 
-const VideoTool = ({ setCaptureImage }) => {
+const VideoTool = ({ setCaptureImage, deviceId }) => {
   const videoRef = useRef(null);
 
   const videoWidth = 640 / 2;
@@ -19,7 +19,7 @@ const VideoTool = ({ setCaptureImage }) => {
     >
       <CameraStreaming
         videoRef={videoRef}
-        deviceId="CAMERA-201-1"
+        deviceId={deviceId}
         style={{ width: `${videoWidth}px`, height: `${videoHeight}px` }}
         turnOnCapture={true}
       />
