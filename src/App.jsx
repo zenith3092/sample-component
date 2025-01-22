@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
-import Toggle from "./toggle";
+import Toggle from "./exhibition/toggle/Toggle";
 import "./App.css";
-import PromptCard, { PromptContent, PromptHeader } from "./PromptCard";
-import DrawPolygonTool from "./DrawPolygonTool";
+import DrawPolygonTool from "./exhibition/drawing-tools/DrawPolygonTool";
 
 function App() {
   const [openPrompt, setOpenPrompt] = useState(false);
@@ -19,29 +18,6 @@ function App() {
         Output2
       </button>
       <DrawPolygonTool ref={toolRef} />
-      <PromptCard
-        {...{
-          openPrompt,
-          setOpenPrompt,
-          mainConfigs: {
-            style: { width: "500px", height: "500px" },
-          },
-        }}
-      >
-        <PromptHeader
-          title="Prompt Card"
-          handlePromptClose={() => setOpenPrompt(false)}
-        />
-        <PromptContent>
-          <div
-            className="toggle-prompt-content"
-            style={{ width: "100%", height: "100%" }}
-          >
-            <h1>Title</h1>
-            <p>Content</p>
-          </div>
-        </PromptContent>
-      </PromptCard>
     </>
   );
 }
