@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from "react";
 import Toggle from "./exhibition/toggle/Toggle";
 import "./App.css";
-import DrawPolygonTool from "./exhibition/drawing-tools/image-contours/DrawPolygonTool";
-import ImageDrawPolygonTool from "./exhibition/drawing-tools/video-contours/DrawPolygonTool";
-import VideoDrawRectangleTool from "./exhibition/drawing-tools/video-contours/DrawRectangleTool";
+import ImageDrawPolygonTool from "./exhibition/drawing-tools/image-contours/DrawPolygonTool";
+import VideoDrawPolygonTool from "./exhibition/drawing-tools/video-contours/DrawPolygonTool";
+import DrawRectangleTool from "./exhibition/drawing-tools/video-contours/DrawRectangleTool";
 import DrawLineTool from "./exhibition/drawing-tools/video-contours/DrawLineTool";
 import DrawIconTool from "./exhibition/drawing-tools/video-contours/DrawIconTool";
 import VideoTool from "./exhibition/video-tool/VideoTool";
