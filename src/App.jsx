@@ -2,8 +2,8 @@ import { useRef, useState, useEffect } from "react";
 import Toggle from "./exhibition/toggle/Toggle";
 import "./App.css";
 import DrawPolygonTool from "./exhibition/drawing-tools/image-contours/DrawPolygonTool";
-// import DrawPolygonTool from "./exhibition/drawing-tools/video-contours/DrawPolygonTool";
-import DrawRectangleTool from "./exhibition/drawing-tools/video-contours/DrawRectangleTool";
+import ImageDrawPolygonTool from "./exhibition/drawing-tools/video-contours/DrawPolygonTool";
+import VideoDrawRectangleTool from "./exhibition/drawing-tools/video-contours/DrawRectangleTool";
 import DrawLineTool from "./exhibition/drawing-tools/video-contours/DrawLineTool";
 import DrawIconTool from "./exhibition/drawing-tools/video-contours/DrawIconTool";
 import VideoTool from "./exhibition/video-tool/VideoTool";
@@ -57,7 +57,7 @@ function App() {
                 </button>
             </div>
 
-            <DrawPolygonTool ref={toolRef} />
+            <ImageDrawPolygonTool ref={toolRef} />
 
             <VideoTool
                 deviceId={"CAMERA-201-1"}
@@ -66,7 +66,7 @@ function App() {
                 videoHeight={360}
             />
 
-            {/* <DrawPolygonTool ref={toolRef}>
+            {/* <VideoDrawPolygonTool ref={toolRef}>
                 <VideoTool
                     deviceId={"CAMERA-201-1"}
                     setCaptureImage={setCaptureImage}
@@ -74,9 +74,9 @@ function App() {
                     videoHeight={360}
                     turnOnCapture={false}
                 />
-            </DrawPolygonTool> */}
+            </VideoDrawPolygonTool>
 
-            {/* <DrawRectangleTool ref={toolRef}>
+            <DrawRectangleTool ref={toolRef}>
                 <VideoTool
                     deviceId={"CAMERA-201-1"}
                     setCaptureImage={setCaptureImage}
@@ -85,8 +85,8 @@ function App() {
                     turnOnCapture={false}
                 />
             </DrawRectangleTool> */}
-
-            {/* <DrawLineTool ref={toolRef}>
+            {/* 
+            <DrawLineTool ref={toolRef}>
                 <VideoTool
                     deviceId={"CAMERA-201-1"}
                     setCaptureImage={setCaptureImage}
@@ -94,9 +94,9 @@ function App() {
                     videoHeight={360}
                     turnOnCapture={false}
                 />
-            </DrawLineTool> */}
+            </DrawLineTool>
 
-            {/* <DrawIconTool ref={toolRef}>
+            <DrawIconTool ref={toolRef}>
                 <VideoTool
                     deviceId={"CAMERA-201-1"}
                     setCaptureImage={setCaptureImage}

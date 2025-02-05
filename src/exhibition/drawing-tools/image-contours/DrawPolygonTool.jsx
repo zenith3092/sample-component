@@ -6,6 +6,7 @@ import React, {
     useImperativeHandle,
     useCallback,
 } from "react";
+import { toBlob } from "html-to-image";
 
 /**
  * @typedef {object} DrawingTool
