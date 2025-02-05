@@ -22,88 +22,92 @@ import "./PromptCard.scss";
  * @param {string} props.mainConfigs.className - The class name of the main container.
  */
 const PromptCard = ({
-  openPrompt,
-  setOpenPrompt,
-  enableBodyOverflow,
-  handlePromptClose = null,
-  baseConfigs = {
-    id: "",
-    style: {},
-    className: "",
-  },
-  groundConfigs = {
-    id: "",
-    style: {},
-    className: "",
-  },
-  mainConfigs = {
-    id: "",
-    style: {},
-    className: "",
-  },
-  children,
+    openPrompt,
+    setOpenPrompt,
+    enableBodyOverflow,
+    handlePromptClose = null,
+    baseConfigs = {
+        id: "",
+        style: {},
+        className: "",
+    },
+    groundConfigs = {
+        id: "",
+        style: {},
+        className: "",
+    },
+    mainConfigs = {
+        id: "",
+        style: {},
+        className: "",
+    },
+    children,
 }) => {
-  useEffect(() => {
-    if (!enableBodyOverflow) {
-      if (openPrompt) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
-    }
-  }, [openPrompt]);
+    useEffect(() => {
+        if (!enableBodyOverflow) {
+            if (openPrompt) {
+                document.body.style.overflow = "hidden";
+            } else {
+                document.body.style.overflow = "";
+            }
+        }
+    }, [openPrompt]);
 
-  return (
-    openPrompt && (
-      <div
-        id={baseConfigs.id || ""}
-        style={baseConfigs.style || {}}
-        className={`prompt-card-base ${baseConfigs.className || ""}`}
-        onClick={(e) => {
-          if (handlePromptClose) {
-            handlePromptClose();
-          } else {
-            setOpenPrompt(false);
-          }
-        }}
-      >
-        <div
-          id={groundConfigs.id || ""}
-          style={groundConfigs.style || {}}
-          className={`prompt-card-ground ${groundConfigs.className || ""}`}
-        >
-          <div
-            id={mainConfigs.id || ""}
-            style={mainConfigs.style || {}}
-            className={`prompt-card-main ${mainConfigs.className || ""}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {children}
-          </div>
-        </div>
-      </div>
-    )
-  );
+    return (
+        openPrompt && (
+            <div
+                id={baseConfigs.id || ""}
+                style={baseConfigs.style || {}}
+                className={`prompt-card-base ${baseConfigs.className || ""}`}
+                onClick={(e) => {
+                    if (handlePromptClose) {
+                        handlePromptClose();
+                    } else {
+                        setOpenPrompt(false);
+                    }
+                }}
+            >
+                <div
+                    id={groundConfigs.id || ""}
+                    style={groundConfigs.style || {}}
+                    className={`prompt-card-ground ${
+                        groundConfigs.className || ""
+                    }`}
+                >
+                    <div
+                        id={mainConfigs.id || ""}
+                        style={mainConfigs.style || {}}
+                        className={`prompt-card-main ${
+                            mainConfigs.className || ""
+                        }`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {children}
+                    </div>
+                </div>
+            </div>
+        )
+    );
 };
 
 export default PromptCard;
 
 const PromptContent = ({ children }) => {
-  const contentRef = useRef(null);
+    const contentRef = useRef(null);
 
-  useLayoutEffect(() => {
-    if (contentRef.current) {
-      const contentHeight = `calc(${contentRef.current.parentElement.style.height} - ${contentRef.current.previousSibling.style.height})`;
-      contentRef.current.style.height = contentHeight;
-      contentRef.current.style.maxHeight = contentHeight;
-    }
-  }, []);
+    useLayoutEffect(() => {
+        if (contentRef.current) {
+            const contentHeight = `calc(${contentRef.current.parentElement.style.height} - ${contentRef.current.previousSibling.style.height})`;
+            contentRef.current.style.height = contentHeight;
+            contentRef.current.style.maxHeight = contentHeight;
+        }
+    }, []);
 
-  return (
-    <div className="prompt-card-content" ref={contentRef}>
-      {children}
-    </div>
-  );
+    return (
+        <div className="prompt-card-content" ref={contentRef}>
+            {children}
+        </div>
+    );
 };
 
 /**
@@ -114,15 +118,15 @@ const PromptContent = ({ children }) => {
  * @param {React.JSX.Element} props.children - The children of the header. This element will be placed between the title and the close button.
  */
 const PromptHeader = ({ handlePromptClose, title, children }) => {
-  return (
-    <div className="prompt-card-header" style={{ height: "40px" }}>
-      <div className="prompt-card-title">{title}</div>
-      {children}
-      <div className="prompt-card-close" onClick={handlePromptClose}>
-        <IoClose />
-      </div>
-    </div>
-  );
+    return (
+        <div className="prompt-card-header" style={{ height: "40px" }}>
+            <div className="prompt-card-title">{title}</div>
+            {children}
+            <div className="prompt-card-close" onClick={handlePromptClose}>
+                <IoClose />
+            </div>
+        </div>
+    );
 };
 
 export { PromptContent, PromptHeader, PromptCard };
