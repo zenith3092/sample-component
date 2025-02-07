@@ -1,13 +1,13 @@
 import { useRef, useState, useEffect } from "react";
-import Toggle from "./exhibition/toggle/Toggle";
+// import Toggle from "./exhibition/toggle/Toggle";
 import "./App.css";
-import ImageDrawPolygonTool from "./exhibition/drawing-tools/image-contours/DrawPolygonTool";
-import VideoDrawPolygonTool from "./exhibition/drawing-tools/video-contours/DrawPolygonTool";
-import DrawRectangleTool from "./exhibition/drawing-tools/video-contours/DrawRectangleTool";
-import DrawLineTool from "./exhibition/drawing-tools/video-contours/DrawLineTool";
-import DrawIconTool from "./exhibition/drawing-tools/video-contours/DrawIconTool";
-import VideoTool from "./exhibition/video-tool/VideoTool";
-import axios from "axios";
+// import ImageDrawPolygonTool from "./exhibition/drawing-tools/image-contours/DrawPolygonTool";
+// import VideoDrawPolygonTool from "./exhibition/drawing-tools/video-contours/DrawPolygonTool";
+// import DrawRectangleTool from "./exhibition/drawing-tools/video-contours/DrawRectangleTool";
+// import DrawLineTool from "./exhibition/drawing-tools/video-contours/DrawLineTool";
+// import DrawIconTool from "./exhibition/drawing-tools/video-contours/DrawIconTool";
+// import VideoTool from "./exhibition/video-tool/VideoTool";
+import AutoCapture from "./exhibition/auto-capture/Auto-Capture";
 
 const WEB_SERVER_URL = import.meta.env.VITE_WEB_SERVER_URL;
 
@@ -16,16 +16,17 @@ function App() {
 
     const [captureImage, setCaptureImage] = useState("");
 
-    useEffect(() => {
-        toolRef.current.changeImage(captureImage);
-        toolRef.current.clearPolygons();
-    }, [captureImage]);
+    // useEffect(() => {
+    //     toolRef.current.changeImage(captureImage);
+    //     toolRef.current.clearPolygons();
+    // }, [captureImage]);
 
     return (
         <div className="App" style={{ marginTop: "20px" }}>
+            <AutoCapture />
             {/* <Toggle /> */}
 
-            <div>
+            {/* <div>
                 <button
                     onClick={() => {
                         console.log(toolRef.current.polygons);
@@ -55,16 +56,16 @@ function App() {
                 >
                     Image Output
                 </button>
-            </div>
+            </div> */}
 
-            <ImageDrawPolygonTool ref={toolRef} />
+            {/* <ImageDrawPolygonTool ref={toolRef} /> */}
 
-            <VideoTool
+            {/* <VideoTool
                 deviceId={"CAMERA-201-1"}
                 setCaptureImage={setCaptureImage}
                 videoWidth={640}
                 videoHeight={360}
-            />
+            /> */}
 
             {/* <VideoDrawPolygonTool ref={toolRef}>
                 <VideoTool
