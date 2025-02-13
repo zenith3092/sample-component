@@ -7,11 +7,13 @@ import "./App.css";
 // import DrawLineTool from "./exhibition/drawing-tools/video-contours/DrawLineTool";
 // import DrawIconTool from "./exhibition/drawing-tools/video-contours/DrawIconTool";
 // import VideoTool from "./exhibition/video-tool/VideoTool";
-import AutoCapture from "./exhibition/auto-capture/Auto-Capture";
+// import AutoCapture from "./exhibition/auto-capture/Auto-Capture";
+import Playback from "./exhibition/playback/Playback";
 
 const WEB_SERVER_URL = import.meta.env.VITE_WEB_SERVER_URL;
 
 function App() {
+    const tool1Ref = useRef(null);
     const toolRef = useRef(null);
 
     const [captureImage, setCaptureImage] = useState("");
@@ -23,7 +25,9 @@ function App() {
 
     return (
         <div className="App" style={{ marginTop: "20px" }}>
-            <AutoCapture />
+            <Playback />
+
+            {/* <AutoCapture /> */}
             {/* <Toggle /> */}
 
             {/* <div>
@@ -66,8 +70,15 @@ function App() {
                 videoWidth={640}
                 videoHeight={360}
             /> */}
-
-            {/* <VideoDrawPolygonTool ref={toolRef}>
+            {/* <button
+                style={{ marginTop: "20px" }}
+                onClick={() => {
+                    console.log(tool1Ref.current.polygons);
+                }}
+            >
+                Export
+            </button>
+            <VideoDrawPolygonTool ref={tool1Ref}>
                 <VideoTool
                     deviceId={"CAMERA-201-1"}
                     setCaptureImage={setCaptureImage}
@@ -85,8 +96,8 @@ function App() {
                     videoHeight={360}
                     turnOnCapture={false}
                 />
-            </DrawRectangleTool> */}
-            {/* 
+            </DrawRectangleTool>
+
             <DrawLineTool ref={toolRef}>
                 <VideoTool
                     deviceId={"CAMERA-201-1"}
