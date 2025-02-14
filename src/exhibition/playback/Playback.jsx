@@ -5,6 +5,7 @@ import {
     getCameraDevices,
     getRecorderDevices,
 } from "./apis/control-server-api";
+import Player from "./player";
 
 const WEB_SERVER_URL = import.meta.env.VITE_WEB_SERVER_URL;
 
@@ -198,10 +199,20 @@ const Playback = () => {
                 </button>
             </div>
 
-            <video
-                ref={videoRef}
-                controls
-                style={{ width: "640px", height: "360px" }}
+            <Player
+                videoRef={videoRef}
+                startStamp={`${startDate} ${startTime}`}
+                endStamp={`${endDate} ${endTime}`}
+                downloadCallback={() => {
+                    if (actionId !== "") {
+                        const a = document.createElement("a");
+                        a.href = `${WEB_SERVER_URL}/api/video/download_video?file=${filePath}`;
+                        a.download = `video_${actionId}.mp4`;
+                        a.click();
+
+                        a.remove();
+                    }
+                }}
             />
         </div>
     );
