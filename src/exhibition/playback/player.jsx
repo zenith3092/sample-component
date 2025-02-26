@@ -99,6 +99,7 @@ const Player = ({
         <div className="playback-player">
             <video
                 className="playback-video"
+                src="https://10.0.0.128/playback/20250214151924317.mp4"
                 ref={videoRef}
                 style={videoStyle}
                 onPlay={() => setIsPlaying(true)}

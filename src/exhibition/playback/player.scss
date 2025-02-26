@@ -4,14 +4,15 @@
 
 $border-radius: 5px;
 $timeline-bar-bg: #f9fd95;
+$mask-bg-color: rgb(35, 35, 35, 0.5);
 $function-height: 25%;
 $button-height: 50%;
 $timeline-height: 50%;
 $timeline-size: var(--timeline-size);
 
 .playback-player {
-    width: 1280px;
-    height: 720px;
+    width: 1024px;
+    height: 576px;
     position: relative;
     background-color: rgb(60, 60, 60);
     border-radius: $border-radius;
@@ -49,7 +50,7 @@ $timeline-size: var(--timeline-size);
     top: 0;
     left: 0;
     z-index: 2;
-    background-color: rgb(35, 35, 35, 0.5);
+    background-color: $mask-bg-color;
     display: flex;
     justify-content: center;
     align-items: center;

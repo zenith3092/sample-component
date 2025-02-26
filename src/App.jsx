@@ -8,7 +8,9 @@ import "./App.css";
 // import DrawIconTool from "./exhibition/drawing-tools/video-contours/DrawIconTool";
 // import VideoTool from "./exhibition/video-tool/VideoTool";
 // import AutoCapture from "./exhibition/auto-capture/Auto-Capture";
-import Playback from "./exhibition/playback/Playback";
+// import Playback from "./exhibition/playback/Playback";
+
+import AudioSender from "./exhibition/audio-tool/AudioSender";
 
 const WEB_SERVER_URL = import.meta.env.VITE_WEB_SERVER_URL;
 
@@ -25,7 +27,10 @@ function App() {
 
     return (
         <div className="App" style={{ marginTop: "20px" }}>
-            <Playback />
+            <AudioSender />
+            {/* <AudioTool /> */}
+
+            {/* <Playback /> */}
 
             {/* <AutoCapture /> */}
             {/* <Toggle /> */}
